@@ -59,36 +59,41 @@
              isEmpty && isPast && 'border-dashed border-category-empty bg-category-empty/20',
              isEmpty && !isPast && 'border-dashed border-muted-foreground/30 bg-muted/50',
              !isEmpty && 'border-transparent',
-             isCurrentHour && 'ring-2 ring-primary ring-offset-2'
-           )}
-           style={category ? { backgroundColor: category.color } : undefined}
+            isCurrentHour && 'ring-2 ring-primary ring-offset-2',
+            !isEmpty && customText && 'bg-white dark:bg-black'
+          )}
+          style={category && !customText ? { backgroundColor: category.color } : undefined}
          >
            {/* Hour label */}
            <span
              className={cn(
                'absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium',
-               isEmpty ? 'text-muted-foreground' : 'text-white/90'
-             )}
-           >
-             {formatHour(hour)}
-           </span>
- 
-           {/* Category content */}
-           {category && (
-             <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
-               <span className="text-lg">{category.icon}</span>
-               <span className="text-sm font-medium text-white">
-                 {customText || category.name}
-               </span>
-             </div>
-           )}
- 
-           {/* Empty state */}
-           {isEmpty && isPast && (
-             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
-               Tap to fill
-             </span>
-           )}
+              isEmpty ? 'text-muted-foreground' : customText ? 'text-black dark:text-white' : 'text-white/90'
+            )}
+          >
+            {formatHour(hour)}
+          </span>
+
+          {/* Category content */}
+          {category && (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
+              <span className="text-lg">{category.icon}</span>
+              <span className={cn(
+                "text-sm font-medium",
+                customText ? 'text-black dark:text-white' : 'text-white'
+              )}>
+                {customText || category.name}
+              </span>
+            </div>
+          )}
+
+          {/* Empty state */}
+          {isEmpty && isPast && (
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+              Tap to fill
+            </span>
+          )}
+           
  
            {/* Current hour indicator */}
            {isCurrentHour && (
