@@ -61,6 +61,14 @@ export const useTimeEntries = () => {
     const weekAgo = new Date();
     weekAgo.setDate(weekAgo.getDate() - 7);
     loadEntries(getDateKey(weekAgo), today);
+
+    // Auto-refresh every 30 seconds to pick up notification button clicks
+    const refreshInterval = setInterval(() => {
+      console.log('Auto-refreshing entries...');
+      loadEntries(getDateKey(weekAgo), today);
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(refreshInterval);
   }, [loadEntries]);
    useEffect(() => {
      if (entries.length > 0) {

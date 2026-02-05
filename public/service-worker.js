@@ -116,6 +116,16 @@ self.addEventListener('notificationclick', (event) => {
       }).then(response => response.json()).then(result => {
         console.log(`✅ ${activity.customText} logged successfully:`, result);
         
+        // Notify all open tabs to refresh
+        self.clients.matchAll({ type: 'window' }).then(clients => {
+          clients.forEach(client => {
+            client.postMessage({
+              type: 'ENTRY_SAVED',
+              data: { date: dateStr, hour, categoryId: activity.categoryId }
+            });
+          });
+        });
+        
         // Close notification and show confirmation
         event.notification.close();
         

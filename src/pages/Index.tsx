@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { CalendarView } from '@/components/CalendarView';
 import { Dashboard } from '@/components/Dashboard';
@@ -18,6 +18,7 @@ const Index = () => {
     setSelectedDate,
     updateEntry,
     getEntriesForDate,
+    loadEntries,
   } = useTimeEntries();
  
    const {
@@ -40,6 +41,33 @@ const Index = () => {
     enablePushNotifications,
     disablePushNotifications,
   } = useNotifications();
+
+  // Listen for service worker messages about saved entries
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data && event.data.type === 'ENTRY_SAVED') {
+        console.log('Entry saved from notification, refreshing data...');
+        const today = new Date();
+        const weekAgo = new Date(today);
+        weekAgo.setDate(weekAgo.getDate() - 7);
+        
+        const getDateKey = (date: Date): string => {
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const day = String(date.getDate()).padStart(2, '0');
+          return `${year}-${month}-${day}`;
+        };
+        
+        loadEntries(getDateKey(weekAgo), getDateKey(today));
+      }
+    };
+
+    navigator.serviceWorker?.addEventListener('message', handleMessage);
+
+    return () => {
+      navigator.serviceWorker?.removeEventListener('message', handleMessage);
+    };
+  }, [loadEntries]);
 
   return (
     <div className="min-h-screen bg-background">
