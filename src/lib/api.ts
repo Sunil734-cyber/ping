@@ -16,20 +16,35 @@ export interface ApiResponse<T> {
 
 class ApiClient {
   private baseUrl: string;
-  private userId: string;
 
   constructor(baseUrl: string = API_BASE_URL) {
     this.baseUrl = baseUrl;
-    this.userId = this.getUserId();
+  }
+
+  private getAuthToken(): string | null {
+    const authData = localStorage.getItem('pingdaily_auth');
+    if (authData) {
+      try {
+        const { token } = JSON.parse(authData);
+        return token;
+      } catch {
+        return null;
+      }
+    }
+    return null;
   }
 
   private getUserId(): string {
-    let userId = localStorage.getItem('userId');
-    if (!userId) {
-      userId = 'demo-user';
-      localStorage.setItem('userId', userId);
+    const authData = localStorage.getItem('pingdaily_auth');
+    if (authData) {
+      try {
+        const { user } = JSON.parse(authData);
+        return user?.id || 'demo-user';
+      } catch {
+        return 'demo-user';
+      }
     }
-    return userId;
+    return 'demo-user';
   }
 
   private async request<T>(
@@ -37,13 +52,20 @@ class ApiClient {
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
     const url = `${this.baseUrl}${endpoint}`;
+    const token = this.getAuthToken();
+    
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+      ...(options.headers || {}),
+    };
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
     
     const config: RequestInit = {
       ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
+      headers,
     };
 
     try {
@@ -63,7 +85,8 @@ class ApiClient {
 
   // Notification Settings
   async getNotificationSettings() {
-    return this.request<any>(`/notifications/settings?userId=${this.userId}`);
+    const userId = this.getUserId();
+    return this.request<any>(`/notifications/settings?userId=${userId}`);
   }
 
   async updateNotificationSettings(settings: {
@@ -73,9 +96,10 @@ class ApiClient {
     endTime?: string;
     daysOfWeek?: number[];
   }) {
+    const userId = this.getUserId();
     return this.request<any>('/notifications/settings', {
       method: 'PUT',
-      body: JSON.stringify({ ...settings, userId: this.userId }),
+      body: JSON.stringify({ ...settings, userId }),
     });
   }
 
@@ -85,8 +109,9 @@ class ApiClient {
     skip?: number;
     unreadOnly?: boolean;
   }) {
+    const userId = this.getUserId();
     const queryParams = new URLSearchParams({
-      userId: this.userId,
+      userId,
       ...(params?.limit && { limit: params.limit.toString() }),
       ...(params?.skip && { skip: params.skip.toString() }),
       ...(params?.unreadOnly && { unreadOnly: 'true' }),
@@ -101,9 +126,10 @@ class ApiClient {
     scheduledFor?: Date;
     metadata?: any;
   }) {
+    const userId = this.getUserId();
     return this.request<any>('/notifications', {
       method: 'POST',
-      body: JSON.stringify({ ...notification, userId: this.userId }),
+      body: JSON.stringify({ ...notification, userId }),
     });
   }
 
@@ -127,14 +153,16 @@ class ApiClient {
   }
 
   async markAllNotificationsAsRead() {
+    const userId = this.getUserId();
     return this.request<any>('/notifications/mark-all-read', {
       method: 'POST',
-      body: JSON.stringify({ userId: this.userId }),
+      body: JSON.stringify({ userId }),
     });
   }
 
   async getNotificationStats() {
-    return this.request<any>(`/notifications/stats/summary?userId=${this.userId}`);
+    const userId = this.getUserId();
+    return this.request<any>(`/notifications/stats/summary?userId=${userId}`);
   }
 
   // Time Entries
@@ -142,8 +170,9 @@ class ApiClient {
     startDate?: string;
     endDate?: string;
   }) {
+    const userId = this.getUserId();
     const queryParams = new URLSearchParams({
-      userId: this.userId,
+      userId,
       ...(params?.startDate && { startDate: params.startDate }),
       ...(params?.endDate && { endDate: params.endDate }),
     });
@@ -152,7 +181,8 @@ class ApiClient {
   }
 
   async getTimeEntriesForDate(date: string) {
-    return this.request<any[]>(`/time-entries/date/${date}?userId=${this.userId}`);
+    const userId = this.getUserId();
+    return this.request<any[]>(`/time-entries/date/${date}?userId=${userId}`);
   }
 
   async createTimeEntry(entry: {
@@ -162,9 +192,10 @@ class ApiClient {
     customText?: string;
     notificationId?: string;
   }) {
+    const userId = this.getUserId();
     return this.request<any>('/time-entries', {
       method: 'POST',
-      body: JSON.stringify({ ...entry, userId: this.userId }),
+      body: JSON.stringify({ ...entry, userId }),
     });
   }
 
@@ -191,8 +222,9 @@ class ApiClient {
     startDate?: string;
     endDate?: string;
   }) {
+    const userId = this.getUserId();
     const queryParams = new URLSearchParams({
-      userId: this.userId,
+      userId,
       ...(params?.startDate && { startDate: params.startDate }),
       ...(params?.endDate && { endDate: params.endDate }),
     });
