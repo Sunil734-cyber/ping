@@ -1,12 +1,12 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import connectDB from './config/database';
-import notificationRoutes from './routes/notifications';
-import timeEntryRoutes from './routes/timeEntries';
-import pushRoutes from './routes/push';
-import { errorHandler } from './middleware/errorHandler';
-import { notificationScheduler } from './services/notificationScheduler';
+import connectDB from './config/database.js';
+import notificationRoutes from './routes/notifications.js';
+import timeEntryRoutes from './routes/timeEntries.js';
+import pushRoutes from './routes/push.js';
+import { errorHandler } from './middleware/errorHandler.js';
+import { notificationScheduler } from './services/notificationScheduler.js';
 
 // Load environment variables
 dotenv.config();

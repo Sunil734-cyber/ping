@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
-import TimeEntry from '../models/TimeEntry';
-import { ApiError } from '../middleware/errorHandler';
+import TimeEntry from '../models/TimeEntry.js';
+import { ApiError } from '../middleware/errorHandler.js';
 
 const router = express.Router();
 

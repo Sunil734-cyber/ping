@@ -1,8 +1,8 @@
 import cron from 'node-cron';
 import webpush from 'web-push';
-import NotificationSettings from '../models/NotificationSettings';
-import PushSubscription from '../models/PushSubscription';
-import Notification from '../models/Notification';
+import NotificationSettings from '../models/NotificationSettings.js';
+import PushSubscription from '../models/PushSubscription.js';
+import Notification from '../models/Notification.js';
 
 class NotificationScheduler {
   private jobs: Map<string, cron.ScheduledTask> = new Map();
@@ -104,7 +104,7 @@ class NotificationScheduler {
         requireInteraction: true,
         data: {
           url: '/',
-          notificationId: notificationRecord._id,
+          notificationId: notificationRecord?._id?.toString() || '',
           timestamp: Date.now()
         }
       });

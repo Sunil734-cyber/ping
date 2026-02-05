@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
-import Notification from '../models/Notification';
-import NotificationSettings from '../models/NotificationSettings';
-import { ApiError } from '../middleware/errorHandler';
+import Notification from '../models/Notification.js';
+import NotificationSettings from '../models/NotificationSettings.js';
+import { ApiError } from '../middleware/errorHandler.js';
 
 const router = express.Router();
 

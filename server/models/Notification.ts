@@ -10,6 +10,7 @@ export interface INotification extends Document {
   read: boolean;
   metadata?: {
     interval?: number;
+    source?: string;
     customData?: any;
   };
 }

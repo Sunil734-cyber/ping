@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import webpush from 'web-push';
-import PushSubscription from '../models/PushSubscription';
-import { ApiError } from '../middleware/errorHandler';
+import PushSubscription from '../models/PushSubscription.js';
+import { ApiError } from '../middleware/errorHandler.js';
 
 const router = express.Router();
 
