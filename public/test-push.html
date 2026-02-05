@@ -223,18 +223,18 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            userId: 'demo-user',, 'success');
-          log('Next: Tap "Send Test Notification"', 'info');
-        } else {
-          log(`❌ Server error: ${result.error || result.message
+            userId: 'demo-user',
+            subscription: subscription.toJSON()
+          })
         });
 
         const result = await saveResponse.json();
         if (result.success) {
           log('✅ Subscription saved to server!', 'success');
-          log('You will now receive notifications every minute');
+          log('You will now receive notifications every minute', 'success');
+          log('Next: Tap "Send Test Notification"', 'info');
         } else {
-          log(`❌ Server error: ${result.error}`, 'error');
+          log(`❌ Server error: ${result.error || result.message}`, 'error');
         }
       } catch (error) {
         log(`❌ Error: ${error.message || error}`, 'error');
@@ -254,6 +254,7 @@
           body: JSON.stringify({ userId: 'demo-user' })
         });
 
+        const result = await response.json();
         log(`Server response: ${JSON.stringify(result)}`);
         
         if (result.success) {
@@ -269,8 +270,7 @@
           log(`Unexpected: ${JSON.stringify(result)}`, 'error');
         }
       } catch (error) {
-        log(`❌ Error: ${error.message || error
-        log(`❌ Error: ${error.message}`, 'error');
+        log(`❌ Error: ${error.message || error}`, 'error');
       }
     }
 
