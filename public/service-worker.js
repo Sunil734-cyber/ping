@@ -49,18 +49,22 @@ self.addEventListener('push', (event) => {
     requireInteraction: notificationData.requireInteraction,
     data: notificationData.data,
     vibrate: [200, 100, 200],
+    requireInteraction: true,
     actions: [
       {
         action: 'working',
-        title: '💼 Working'
+        title: '💼 Work',
+        icon: '/icon.png'
       },
       {
         action: 'break',
-        title: '☕ Break'
+        title: '☕ Break',
+        icon: '/icon.png'
       },
       {
         action: 'meeting',
-        title: '👥 Meeting'
+        title: '👥 Meet',
+        icon: '/icon.png'
       }
     ]
   }).then(() => {
@@ -76,8 +80,6 @@ self.addEventListener('push', (event) => {
 self.addEventListener('notificationclick', (event) => {
   console.log('Notification clicked:', event);
   console.log('Action:', event.action);
-  
-  event.notification.close();
 
   // Handle quick actions
   if (event.action === 'working' || event.action === 'break' || event.action === 'meeting') {
@@ -94,7 +96,12 @@ self.addEventListener('notificationclick', (event) => {
     
     console.log(`Quick action selected: ${activity.customText} for ${dateStr} ${hour}:00`);
     
-    // Send to API to log activity
+    // Add haptic feedback for mobile
+    if ('vibrate' in navigator) {
+      navigator.vibrate(200);
+    }
+    
+    // Send to API to log activity - close notification only after success
     event.waitUntil(
       fetch('https://ping-u7qt.onrender.com/api/time-entries', {
         method: 'POST',
@@ -108,8 +115,30 @@ self.addEventListener('notificationclick', (event) => {
         })
       }).then(response => response.json()).then(result => {
         console.log(`✅ ${activity.customText} logged successfully:`, result);
+        
+        // Close notification and show confirmation
+        event.notification.close();
+        
+        return self.registration.showNotification('✅ Logged!', {
+          body: `${activity.customText} saved for ${hour}:00`,
+          icon: '/icon.png',
+          tag: 'confirmation',
+          requireInteraction: false,
+          vibrate: [100, 50, 100]
+        });
       }).catch((error) => {
         console.error('❌ Failed to log activity:', error);
+        
+        // Close notification and show error
+        event.notification.close();
+        
+        return self.registration.showNotification('❌ Failed', {
+          body: 'Could not save activity. Try again.',
+          icon: '/icon.png',
+          tag: 'error',
+          requireInteraction: false,
+          vibrate: [300]
+        });
       })
     );
     return;
