@@ -7,16 +7,16 @@
     "dev": "vite",
     "dev:server": "tsx watch server/index.ts",
     "dev:all": "concurrently \"npm run dev\" \"npm run dev:server\"",
-    "build": "NODE_OPTIONS='--max-old-space-size=2048' vite build",
-    "build:server": "tsc --project tsconfig.server.json",
-    "build:all": "npm run build && npm run build:server",
+    "build": "vite build",
     "build:dev": "vite build --mode development",
+    "build:server": "tsc --project tsconfig.server.json",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
     "server": "node --loader tsx server/index.ts",
-    "start": "node dist-server/index.js"
+    "start": "npm run server",
+    "start:prod": "node dist/server/index.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
