@@ -117,10 +117,10 @@ const updateEntry = useCallback(async (
           
           const newEntry: TimeEntry = {
             id: entryId,
-            hour,
-            date,
-            categoryId,
-            customText,
+            hour: returnedEntry.hour,
+            date: returnedEntry.date,
+            categoryId: returnedEntry.categoryId,
+            customText: returnedEntry.customText,
             timestamp: returnedEntry.timestamp || Date.now(),
           };
           
@@ -135,8 +135,11 @@ const updateEntry = useCallback(async (
     } catch (error) {
       console.error('Failed to update entry:', error);
       // Still update locally even if backend fails
+      const entryId = `${date}-${hour}`;
       setEntries(prev => {
-        const existingIndex = prev.findIndex(e => e.id === entryId);
+        const existingIndex = prev.findIndex(e => 
+          (e.id === entryId) || (e.date === date && e.hour === hour)
+        );
         const newEntry: TimeEntry = {
           id: entryId,
           hour,
