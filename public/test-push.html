@@ -144,14 +144,18 @@
       try {
         // Check if already denied
         if (Notification.permission === 'denied') {
-          log('❌ Permission is BLOCKED!', 'error');
+          log('❌ Notifications are BLOCKED!', 'error');
           log('', 'error');
-          log('📱 To fix:', 'error');
-          log('1. Tap the 🔒 lock icon in address bar', 'error');
-          log('2. Tap "Permissions"', 'error');
-          log('3. Find "Notifications"', 'error');
-          log('4. Change to "Allow"', 'error');
-          log('5. Refresh page and try again', 'error');
+          log('📱 DO THESE STEPS NOW:', 'error');
+          log('', 'error');
+          log('1. Look at the TOP of your browser', 'error');
+          log('2. Tap the 🔒 LOCK icon (left of URL)', 'error');
+          log('3. Tap "Site settings" or "Permissions"', 'error');
+          log('4. Find "Notifications" - it says BLOCKED', 'error');
+          log('5. Tap it and change to ALLOW', 'error');
+          log('6. Come back here and tap this button again', 'error');
+          log('', 'error');
+          log('⚠️ You MUST do steps 1-5 first!', 'error');
           return;
         }
 
