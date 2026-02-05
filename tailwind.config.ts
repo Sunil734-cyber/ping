@@ -13,6 +13,10 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ["Inter", "system-ui", "sans-serif"],
+        display: ["Inter", "system-ui", "sans-serif"],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -57,6 +61,16 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        category: {
+          work: "hsl(var(--category-work))",
+          social: "hsl(var(--category-social))",
+          exercise: "hsl(var(--category-exercise))",
+          commute: "hsl(var(--category-commute))",
+          meals: "hsl(var(--category-meals))",
+          sleep: "hsl(var(--category-sleep))",
+          leisure: "hsl(var(--category-leisure))",
+          empty: "hsl(var(--category-empty))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -80,10 +94,21 @@ export default {
             height: "0",
           },
         },
+        "ping-ring": {
+          "0%": {
+            transform: "scale(1)",
+            opacity: "1",
+          },
+          "100%": {
+            transform: "scale(1.5)",
+            opacity: "0",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "ping-ring": "ping-ring 1.5s ease-out infinite",
       },
     },
   },
