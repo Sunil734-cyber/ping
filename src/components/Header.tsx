@@ -1,4 +1,4 @@
- import { Bell, BellOff, Clock, Settings, Moon, Sun, Monitor } from 'lucide-react';
+ import { Bell, BellOff, Clock, Settings, Moon, Sun, Monitor, LogOut } from 'lucide-react';
  import { Button } from '@/components/ui/button';
  import { cn } from '@/lib/utils';
 import { PingInterval, INTERVAL_OPTIONS } from '@/hooks/useNotifications';
@@ -8,6 +8,8 @@ import {
    PopoverTrigger,
  } from '@/components/ui/popover';
  import { ThemeToggle } from './ThemeToggle';
+ import { useAuth } from '@/hooks/useAuth';
+ import { useNavigate } from 'react-router-dom';
  
  type Theme = 'light' | 'dark' | 'system';
  
@@ -38,6 +40,14 @@ import {
    activeTab,
    onTabChange,
  }: HeaderProps) => {
+   const { logout, username } = useAuth();
+   const navigate = useNavigate();
+
+   const handleLogout = () => {
+     logout();
+     navigate('/login');
+   };
+
    const handleNotificationToggle = async () => {
      if (notificationPermission !== 'granted') {
        await onRequestPermission();
@@ -58,9 +68,13 @@ import {
            <div className="flex items-center gap-2">
              <div className="relative">
                <Clock className="h-6 w-6 text-primary" />
-               <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-primary animate-pulse-soft" />
              </div>
-             <span className="text-xl font-bold">Ping</span>
+             <h1 className="text-xl font-bold">PingDaily</h1>
+             {username && (
+               <span className="text-xs text-muted-foreground hidden sm:inline">
+                 ({username})
+               </span>
+             )}
            </div>
  
           {/* Notification Settings */}
@@ -103,6 +117,18 @@ import {
                  
                  <div className="pt-2 border-t">
                    <ThemeToggle theme={theme} onThemeChange={onThemeChange} />
+                 </div>
+
+                 <div className="pt-2 border-t">
+                   <Button
+                     variant="ghost"
+                     size="sm"
+                     onClick={handleLogout}
+                     className="w-full justify-start text-destructive hover:text-destructive"
+                   >
+                     <LogOut className="h-4 w-4 mr-2" />
+                     Logout
+                   </Button>
                  </div>
                 </div>
               </PopoverContent>
