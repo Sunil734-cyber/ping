@@ -1,21 +1,26 @@
-import { Bell, BellOff, Clock, Settings } from 'lucide-react';
+ import { Bell, BellOff, Clock, Settings, Moon, Sun, Monitor } from 'lucide-react';
  import { Button } from '@/components/ui/button';
  import { cn } from '@/lib/utils';
 import { PingInterval, INTERVAL_OPTIONS } from '@/hooks/useNotifications';
 import {
   Popover,
   PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+   PopoverTrigger,
+ } from '@/components/ui/popover';
+ import { ThemeToggle } from './ThemeToggle';
+ 
+ type Theme = 'light' | 'dark' | 'system';
  
  interface HeaderProps {
    notificationsEnabled: boolean;
    notificationPermission: NotificationPermission;
-  interval: PingInterval;
+   interval: PingInterval;
+   theme: Theme;
    onEnableNotifications: () => void;
    onDisableNotifications: () => void;
    onRequestPermission: () => void;
-  onIntervalChange: (interval: PingInterval) => void;
+   onIntervalChange: (interval: PingInterval) => void;
+   onThemeChange: (theme: Theme) => void;
    activeTab: 'timeline' | 'dashboard';
    onTabChange: (tab: 'timeline' | 'dashboard') => void;
  }
@@ -23,11 +28,13 @@ import {
  export const Header = ({
    notificationsEnabled,
    notificationPermission,
-  interval,
+   interval,
+   theme,
    onEnableNotifications,
    onDisableNotifications,
    onRequestPermission,
-  onIntervalChange,
+   onIntervalChange,
+   onThemeChange,
    activeTab,
    onTabChange,
  }: HeaderProps) => {
@@ -93,6 +100,10 @@ import {
                         : 'Notifications disabled'}
                     </p>
                   </div>
+                 
+                 <div className="pt-2 border-t">
+                   <ThemeToggle theme={theme} onThemeChange={onThemeChange} />
+                 </div>
                 </div>
               </PopoverContent>
             </Popover>

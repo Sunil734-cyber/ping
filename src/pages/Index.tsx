@@ -4,6 +4,8 @@ import { CalendarView } from '@/components/CalendarView';
 import { Dashboard } from '@/components/Dashboard';
 import { useTimeEntries } from '@/hooks/useTimeEntries';
 import { useNotifications } from '@/hooks/useNotifications';
+ import { useGoals } from '@/hooks/useGoals';
+ import { useTheme } from '@/hooks/useTheme';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<'timeline' | 'dashboard'>('timeline');
@@ -17,6 +19,14 @@ const Index = () => {
     updateEntry,
     getEntriesForDate,
   } = useTimeEntries();
+ 
+   const {
+     goalsWithProgress,
+     addGoal,
+     removeGoal,
+   } = useGoals(entries, weekEntries);
+ 
+   const { theme, setTheme } = useTheme();
 
   const {
     permission,
@@ -38,6 +48,8 @@ const Index = () => {
         onDisableNotifications={stopPings}
         onRequestPermission={requestPermission}
         onIntervalChange={setInterval}
+         theme={theme}
+         onThemeChange={setTheme}
         activeTab={activeTab}
         onTabChange={setActiveTab}
       />
@@ -49,7 +61,14 @@ const Index = () => {
             onUpdateEntry={updateEntry}
           />
         ) : (
-          <Dashboard entries={entries} weekEntries={weekEntries} />
+           <Dashboard 
+             entries={entries} 
+             weekEntries={weekEntries} 
+             allEntries={allEntries}
+             goalsWithProgress={goalsWithProgress}
+             onAddGoal={addGoal}
+             onRemoveGoal={removeGoal}
+           />
         )}
       </main>
 
