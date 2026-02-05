@@ -228,12 +228,15 @@
          <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
            <DialogHeader>
              <DialogTitle>
-               {selectedDate &&
-                 new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-US', {
+               {selectedDate && (() => {
+                 const [year, month, day] = selectedDate.split('-').map(Number);
+                 const date = new Date(year, month - 1, day);
+                 return date.toLocaleDateString('en-US', {
                    weekday: 'long',
                    month: 'long',
                    day: 'numeric',
-                 })}
+                 });
+               })()}
              </DialogTitle>
            </DialogHeader>
            
