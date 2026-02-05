@@ -19,9 +19,7 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:8080',
   'http://localhost:3000',
-  process.env.CLIENT_URL,
-  // Add your production Vercel URL here after deployment
-  // e.g., 'https://your-app.vercel.app'
+  process.env.CLIENT_URL, // Automatically uses your Vercel URL when set in env
 ].filter(Boolean);
 
 app.use(cors({

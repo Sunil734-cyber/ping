@@ -92,19 +92,10 @@ Replace with your actual Render backend URL from Part 1, Step 3.
 1. Go back to Render dashboard
 2. Open your backend service environment variables
 3. Update `CLIENT_URL` to your Vercel URL: `https://your-app.vercel.app`
-4. Also update [server/index.ts](../server/index.ts) line 22 to include your production URL:
+4. Service will automatically redeploy and allow your Vercel URL through CORS
+   - No code changes needed! The `CLIENT_URL` environment variable automatically whitelists your frontend
 
-```typescript
-const allowedOrigins = [
-  'http://localhost:5173',
-  'http://localhost:8080',
-  'http://localhost:3000',
-  process.env.CLIENT_URL,
-  'https://your-app.vercel.app', // Add your actual Vercel URL
-].filter(Boolean);
-```
-
-5. Commit and push changes - Render will auto-deploy
+**That's it!** CORS is now configured automatically via the `CLIENT_URL` environment variable.
 
 ---
 
@@ -182,8 +173,8 @@ Check Render logs to confirm MongoDB connection:
 ### Frontend Issues
 
 **Problem**: API calls fail with CORS error
-- **Solution**: Update `CLIENT_URL` in Render environment variables
-- Add Vercel URL to `allowedOrigins` in server code
+- **Solution**: Update `CLIENT_URL` in Render environment variables to your Vercel URL
+- Backend automatically whitelists the URL from `CLIENT_URL` env var
 
 **Problem**: Service Worker not registering
 - **Solution**: Ensure app is served over HTTPS (automatic on Vercel)
