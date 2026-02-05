@@ -81,10 +81,18 @@ self.addEventListener('notificationclick', (event) => {
 
   // Handle quick actions
   if (event.action === 'working' || event.action === 'break' || event.action === 'meeting') {
-    const activity = event.action === 'working' ? 'Working' : 
-                     event.action === 'break' ? 'Break' : 'Meeting';
+    const activityMap = {
+      'working': { categoryId: 'work', customText: 'Working' },
+      'break': { categoryId: 'break', customText: 'Break' },
+      'meeting': { categoryId: 'meeting', customText: 'Meeting' }
+    };
     
-    console.log(`Quick action selected: ${activity}`);
+    const activity = activityMap[event.action];
+    const now = new Date();
+    const dateStr = now.toISOString().split('T')[0]; // YYYY-MM-DD
+    const hour = now.getHours();
+    
+    console.log(`Quick action selected: ${activity.customText} for ${dateStr} ${hour}:00`);
     
     // Send to API to log activity
     event.waitUntil(
@@ -93,11 +101,13 @@ self.addEventListener('notificationclick', (event) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId: 'demo-user',
-          activity: activity,
-          timestamp: new Date().toISOString()
+          hour: hour,
+          date: dateStr,
+          categoryId: activity.categoryId,
+          customText: activity.customText
         })
-      }).then(() => {
-        console.log(`✅ ${activity} logged successfully`);
+      }).then(response => response.json()).then(result => {
+        console.log(`✅ ${activity.customText} logged successfully:`, result);
       }).catch((error) => {
         console.error('❌ Failed to log activity:', error);
       })
