@@ -142,16 +142,28 @@
       log('Requesting notification permission...');
       
       try {
+        // Check if already denied
+        if (Notification.permission === 'denied') {
+          log('❌ Permission is BLOCKED!', 'error');
+          log('', 'error');
+          log('📱 To fix:', 'error');
+          log('1. Tap the 🔒 lock icon in address bar', 'error');
+          log('2. Tap "Permissions"', 'error');
+          log('3. Find "Notifications"', 'error');
+          log('4. Change to "Allow"', 'error');
+          log('5. Refresh page and try again', 'error');
+          return;
+        }
+
         const permission = await Notification.requestPermission();
-        log(`Permission: ${permission}`, permission === 'granted' ? 'success' : 'error');
+        log(`Permission result: ${permission}`, permission === 'granted' ? 'success' : 'error');
         
         if (permission === 'granted') {
           log('✅ You can now receive notifications', 'success');
           log('Next: Tap "3. Register SW"', 'info');
         } else if (permission === 'denied') {
-          log('❌ Permission DENIED!', 'error');
-          log('Fix: Chrome Settings > Site Settings > Notifications', 'error');
-          log('Find this site and change to "Allow"', 'error');
+          log('❌ You tapped DENY!', 'error');
+          log('Follow the steps above to fix it', 'error');
         } else {
           log('⚠️ Permission dismissed. Tap button again.', 'error');
         }
