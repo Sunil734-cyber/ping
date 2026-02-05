@@ -13,7 +13,8 @@ self.addEventListener('activate', (event) => {
 
 // Handle push notifications
 self.addEventListener('push', (event) => {
-  console.log('Push notification received:', event);
+  console.log('🔔 Push notification received:', event);
+  console.log('Push data exists:', !!event.data);
   
   let notificationData = {
     title: '🔔 Ping!',
@@ -21,7 +22,7 @@ self.addEventListener('push', (event) => {
     icon: '/icon-192.png',
     badge: '/badge-72.png',
     tag: 'ping-notification',
-    requireInteraction: true,
+    requireInteraction: false, // Changed to false for testing
     data: {
       url: '/',
       timestamp: Date.now()
@@ -31,33 +32,40 @@ self.addEventListener('push', (event) => {
   if (event.data) {
     try {
       const payload = event.data.json();
+      console.log('📦 Payload received:', payload);
       notificationData = { ...notificationData, ...payload };
     } catch (error) {
-      console.error('Error parsing push payload:', error);
+      console.error('❌ Error parsing push payload:', error);
     }
   }
 
-  event.waitUntil(
-    self.registration.showNotification(notificationData.title, {
-      body: notificationData.body,
-      icon: notificationData.icon,
-      badge: notificationData.badge,
-      tag: notificationData.tag,
-      requireInteraction: notificationData.requireInteraction,
-      data: notificationData.data,
-      vibrate: [200, 100, 200],
-      actions: [
-        {
-          action: 'open',
-          title: 'Log Activity'
-        },
-        {
-          action: 'close',
-          title: 'Dismiss'
-        }
-      ]
-    })
-  );
+  console.log('📢 About to show notification:', notificationData.title);
+
+  const notificationPromise = self.registration.showNotification(notificationData.title, {
+    body: notificationData.body,
+    icon: notificationData.icon,
+    badge: notificationData.badge,
+    tag: notificationData.tag,
+    requireInteraction: notificationData.requireInteraction,
+    data: notificationData.data,
+    vibrate: [200, 100, 200],
+    actions: [
+      {
+        action: 'open',
+        title: 'Log Activity'
+      },
+      {
+        action: 'close',
+        title: 'Dismiss'
+      }
+    ]
+  }).then(() => {
+    console.log('✅ Notification shown successfully!');
+  }).catch((error) => {
+    console.error('❌ Failed to show notification:', error);
+  });
+
+  event.waitUntil(notificationPromise);
 });
 
 // Handle notification clicks

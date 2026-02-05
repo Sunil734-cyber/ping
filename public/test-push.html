@@ -89,6 +89,7 @@
     <button onclick="registerServiceWorker()">3. Register SW</button>
     <button onclick="subscribeToPush()">4. Subscribe to Push</button>
     <button class="success" onclick="sendTestPush()">Send Test Notification</button>
+    <button class="secondary" onclick="testDirectNotification()">Test Direct Notification</button>
     <button class="danger" onclick="unsubscribe()">Unsubscribe</button>
     <button class="secondary" onclick="clearLog()">Clear Log</button>
   </div>
@@ -300,6 +301,51 @@
         }
       } catch (error) {
         log(`❌ Error: ${error.message || error}`, 'error');
+      }
+    }
+
+    async function testDirectNotification() {
+      log('Testing direct notification...', 'info');
+      
+      try {
+        // Check permission
+        log(`Permission: ${Notification.permission}`, 'info');
+        
+        if (Notification.permission !== 'granted') {
+          log('❌ Permission not granted!', 'error');
+          return;
+        }
+
+        // Try direct notification (not via service worker)
+        log('Creating direct notification...', 'info');
+        const directNotif = new Notification('Direct Test', {
+          body: 'This is a direct notification (not from service worker)',
+          icon: '/icon-192.png',
+          tag: 'direct-test'
+        });
+        log('✅ Direct notification created!', 'success');
+        log('Did you SEE a notification popup?', 'info');
+        
+        // Also try via service worker
+        setTimeout(async () => {
+          log('Now trying via service worker...', 'info');
+          const registration = await navigator.serviceWorker.ready;
+          await registration.showNotification('SW Test', {
+            body: 'This is via service worker',
+            icon: '/icon-192.png',
+            tag: 'sw-test',
+            requireInteraction: false
+          });
+          log('✅ SW notification called!', 'success');
+          log('Did you SEE this notification?', 'info');
+        }, 2000);
+        
+      } catch (error) {
+        log(`❌ Error: ${error.message || error}`, 'error');
+        log(`Error name: ${error.name}`, 'error');
+        if (error.stack) {
+          log(`Stack: ${error.stack.substring(0, 200)}`);
+        }
       }
     }
 
