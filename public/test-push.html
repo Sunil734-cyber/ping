@@ -147,11 +147,16 @@
         
         if (permission === 'granted') {
           log('✅ You can now receive notifications', 'success');
+          log('Next: Tap "3. Register SW"', 'info');
+        } else if (permission === 'denied') {
+          log('❌ Permission DENIED!', 'error');
+          log('Fix: Chrome Settings > Site Settings > Notifications', 'error');
+          log('Find this site and change to "Allow"', 'error');
         } else {
-          log('❌ Permission denied', 'error');
+          log('⚠️ Permission dismissed. Tap button again.', 'error');
         }
       } catch (error) {
-        log(`Error: ${error.message}`, 'error');
+        log(`Error: ${error.message || error}`, 'error');
       }
     }
 
@@ -181,8 +186,16 @@
       log('Subscribing to push notifications...');
       
       try {
+        // Check permission first
+        if (Notification.permission !== 'granted') {
+          log(`❌ Permission is "${Notification.permission}"`, 'error');
+          log('Tap "2. Request Permission" first!', 'error');
+          return;
+        }
+
         if (!swRegistration) {
-          log('Service worker not registered yet!', 'error');
+          log('❌ Service worker not registered yet!', 'error');
+          log('Tap "3. Register SW" first!', 'error');
           return;
         }
 
@@ -210,9 +223,10 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            userId: 'demo-user',
-            subscription: subscription.toJSON()
-          })
+            userId: 'demo-user',, 'success');
+          log('Next: Tap "Send Test Notification"', 'info');
+        } else {
+          log(`❌ Server error: ${result.error || result.message
         });
 
         const result = await saveResponse.json();
@@ -223,8 +237,10 @@
           log(`❌ Server error: ${result.error}`, 'error');
         }
       } catch (error) {
-        log(`❌ Error: ${error.message}`, 'error');
-        log(`Stack: ${error.stack}`);
+        log(`❌ Error: ${error.message || error}`, 'error');
+        if (error.stack) {
+          log(`Details: ${error.stack.substring(0, 200)}`);
+        }
       }
     }
 
@@ -238,13 +254,22 @@
           body: JSON.stringify({ userId: 'demo-user' })
         });
 
-        const result = await response.json();
+        log(`Server response: ${JSON.stringify(result)}`);
+        
         if (result.success) {
           log(`✅ ${result.message}`, 'success');
-        } else {
+          log('Check if notification appeared on screen!', 'success');
+        } else if (result.error) {
           log(`❌ Error: ${result.error}`, 'error');
+          if (result.error.includes('No push subscriptions')) {
+            log('You need to subscribe first!', 'error');
+            log('Tap "4. Subscribe to Push"', 'error');
+          }
+        } else {
+          log(`Unexpected: ${JSON.stringify(result)}`, 'error');
         }
       } catch (error) {
+        log(`❌ Error: ${error.message || error
         log(`❌ Error: ${error.message}`, 'error');
       }
     }
