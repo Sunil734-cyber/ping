@@ -1,10 +1,19 @@
- import { TimeEntry, CATEGORIES, getCategoryById } from '@/lib/types';
+ import { TimeEntry, CATEGORIES } from '@/lib/types';
  import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
  import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+ import { StreakCard } from './StreakCard';
+ import { GoalsCard } from './GoalsCard';
+ import { useStreaks, CategoryStreak } from '@/hooks/useStreaks';
+ import { GoalProgress } from '@/hooks/useGoals';
+ import { CategoryId } from '@/lib/types';
  
  interface DashboardProps {
    entries: TimeEntry[];
    weekEntries: TimeEntry[];
+   allEntries: TimeEntry[];
+   goalsWithProgress: GoalProgress[];
+   onAddGoal: (categoryId: CategoryId, targetHours: number, period: 'daily' | 'weekly') => void;
+   onRemoveGoal: (goalId: string) => void;
  }
  
  const aggregateByCategory = (entries: TimeEntry[]) => {
@@ -29,9 +38,17 @@
    return `${hours} hours`;
  };
  
- export const Dashboard = ({ entries, weekEntries }: DashboardProps) => {
+ export const Dashboard = ({ 
+   entries, 
+   weekEntries, 
+   allEntries,
+   goalsWithProgress,
+   onAddGoal,
+   onRemoveGoal,
+ }: DashboardProps) => {
    const todayData = aggregateByCategory(entries);
    const weekData = aggregateByCategory(weekEntries);
+   const { topStreaks } = useStreaks(allEntries);
    
    const totalToday = entries.filter((e) => e.categoryId).length;
    const totalWeek = weekEntries.length;
@@ -44,6 +61,20 @@
      <div className="space-y-6">
        {/* Summary Cards */}
        <div className="grid grid-cols-2 gap-4">
+         {/* Goals Card */}
+         <div className="col-span-2">
+           <GoalsCard 
+             goalsWithProgress={goalsWithProgress}
+             onAddGoal={onAddGoal}
+             onRemoveGoal={onRemoveGoal}
+           />
+         </div>
+ 
+         {/* Streaks Card */}
+         <div className="col-span-2">
+           <StreakCard streaks={topStreaks} />
+         </div>
+ 
          <Card>
            <CardHeader className="pb-2">
              <CardTitle className="text-sm font-medium text-muted-foreground">
