@@ -51,12 +51,16 @@ self.addEventListener('push', (event) => {
     vibrate: [200, 100, 200],
     actions: [
       {
-        action: 'open',
-        title: 'Log Activity'
+        action: 'working',
+        title: '💼 Working'
       },
       {
-        action: 'close',
-        title: 'Dismiss'
+        action: 'break',
+        title: '☕ Break'
+      },
+      {
+        action: 'meeting',
+        title: '👥 Meeting'
       }
     ]
   }).then(() => {
@@ -71,14 +75,37 @@ self.addEventListener('push', (event) => {
 // Handle notification clicks
 self.addEventListener('notificationclick', (event) => {
   console.log('Notification clicked:', event);
+  console.log('Action:', event.action);
   
   event.notification.close();
 
-  if (event.action === 'close') {
+  // Handle quick actions
+  if (event.action === 'working' || event.action === 'break' || event.action === 'meeting') {
+    const activity = event.action === 'working' ? 'Working' : 
+                     event.action === 'break' ? 'Break' : 'Meeting';
+    
+    console.log(`Quick action selected: ${activity}`);
+    
+    // Send to API to log activity
+    event.waitUntil(
+      fetch('https://ping-u7qt.onrender.com/api/time-entries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: 'demo-user',
+          activity: activity,
+          timestamp: new Date().toISOString()
+        })
+      }).then(() => {
+        console.log(`✅ ${activity} logged successfully`);
+      }).catch((error) => {
+        console.error('❌ Failed to log activity:', error);
+      })
+    );
     return;
   }
 
-  // Open the app
+  // Otherwise open the app
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
       // If app is already open, focus it
