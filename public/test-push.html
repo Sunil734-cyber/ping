@@ -316,41 +316,31 @@
           return;
         }
 
-        // Only try service worker notification (mobile doesn't allow direct)
-        log('Showing notification via service worker...', 'info');
+        // Try absolute minimal notification
+        log('Creating MINIMAL notification...', 'info');
         const registration = await navigator.serviceWorker.ready;
-        await registration.showNotification('🧪 TEST', {
-          body: 'If you see this popup, notifications work!',
-          icon: '/icon-192.png',
-          tag: 'test-notification',
-          requireInteraction: false,
-          vibrate: [200, 100, 200]
-        });
+        await registration.showNotification('TEST');
         
-        log('✅ Notification API call succeeded!', 'success');
+        log('✅ Minimal notification created!', 'success');
         log('', 'info');
-        log('❓ DID YOU SEE A NOTIFICATION POPUP?', 'info');
+        log('❓❓❓ DID YOU SEE ANYTHING? ❓❓❓', 'info');
         log('', 'info');
-        log('IF NO, your OS/browser is blocking it:', 'error');
+        log('IF NO - CHECK CHROME SETTINGS:', 'error');
         log('', 'error');
-        log('📱 ANDROID:', 'error');
-        log('1. Go to Android Settings > Apps > Chrome', 'error');
-        log('2. Tap Notifications', 'error');
-        log('3. Make sure notifications are ON', 'error');
-        log('4. Check Battery Saver is OFF', 'error');
+        log('1. In Chrome address bar, type:', 'error');
+        log('   chrome://settings/content/notifications', 'error');
         log('', 'error');
-        log('💻 WINDOWS:', 'error');
-        log('1. Click Windows Start > Settings', 'error');
-        log('2. System > Notifications', 'error');
-        log('3. Turn ON "Notifications"', 'error');
-        log('4. Turn OFF "Focus assist"', 'error');
-        log('5. Scroll down, find Chrome, turn it ON', 'error');
+        log('2. Make sure "Sites can ask to send" is ON', 'error');
+        log('', 'error');
+        log('3. Scroll to "Allowed to send notifications"', 'error');
+        log('4. Your site should be listed there', 'error');
+        log('', 'error');
+        log('5. Also check Windows Action Center:', 'error');
+        log('   Press Win + A keys together', 'error');
+        log('   Notifications might be there!', 'error');
         
       } catch (error) {
         log(`❌ Error: ${error.message || error}`, 'error');
-        if (error.message.includes('Illegal constructor')) {
-          log('Mobile Chrome requires service worker notifications', 'info');
-        }
       }
     }
 
