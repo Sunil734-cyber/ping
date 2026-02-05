@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Push Notification Test</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 {
+      margin: 0 0 10px 0;
+      font-size: 24px;
+    }
+    button {
+      width: 100%;
+      padding: 15px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background: #007bff;
+      color: white;
+      font-weight: 600;
+      margin: 10px 0;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    button:active {
+      background: #0056b3;
+      transform: scale(0.98);
+    }
+    button.secondary {
+      background: #6c757d;
+    }
+    button.success {
+      background: #28a745;
+    }
+    button.danger {
+      background: #dc3545;
+    }
+    .status {
+      padding: 10px;
+      border-radius: 6px;
+      margin: 10px 0;
+      font-size: 14px;
+    }
+    .status.info { background: #d1ecf1; color: #0c5460; }
+    .status.success { background: #d4edda; color: #155724; }
+    .status.error { background: #f8d7da; color: #721c24; }
+    .log {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 12px;
+      max-height: 300px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🔔 Push Test</h1>
+    <p>Test push notifications on your mobile device</p>
+  </div>
+
+  <div class="card">
+    <h2 style="font-size: 18px; margin-top: 0;">Status</h2>
+    <div id="status"></div>
+  </div>
+
+  <div class="card">
+    <h2 style="font-size: 18px; margin-top: 0;">Actions</h2>
+    <button onclick="checkSupport()">1. Check Support</button>
+    <button onclick="requestPermission()">2. Request Permission</button>
+    <button onclick="registerServiceWorker()">3. Register SW</button>
+    <button onclick="subscribeToPush()">4. Subscribe to Push</button>
+    <button class="success" onclick="sendTestPush()">Send Test Notification</button>
+    <button class="danger" onclick="unsubscribe()">Unsubscribe</button>
+    <button class="secondary" onclick="clearLog()">Clear Log</button>
+  </div>
+
+  <div class="card">
+    <h2 style="font-size: 18px; margin-top: 0;">Log</h2>
+    <div id="log" class="log"></div>
+  </div>
+
+  <script>
+    const API_URL = 'https://ping-u7qt.onrender.com/api';
+    let swRegistration = null;
+
+    function log(message, type = 'info') {
+      const logEl = document.getElementById('log');
+      const time = new Date().toLocaleTimeString();
+      logEl.textContent += `[${time}] ${message}\n`;
+      logEl.scrollTop = logEl.scrollHeight;
+      
+      const statusEl = document.getElementById('status');
+      statusEl.innerHTML = `<div class="status ${type}">${message}</div>`;
+    }
+
+    function clearLog() {
+      document.getElementById('log').textContent = '';
+      log('Log cleared');
+    }
+
+    async function checkSupport() {
+      log('Checking browser support...');
+      
+      const checks = {
+        'Service Worker': 'serviceWorker' in navigator,
+        'Push Manager': 'PushManager' in window,
+        'Notifications': 'Notification' in window,
+        'Current Permission': Notification.permission
+      };
+      
+      for (const [key, value] of Object.entries(checks)) {
+        log(`${key}: ${value}`);
+      }
+      
+      if (checks['Service Worker'] && checks['Push Manager'] && checks['Notifications']) {
+        log('✅ All features supported!', 'success');
+      } else {
+        log('❌ Some features not supported', 'error');
+      }
+    }
+
+    async function requestPermission() {
+      log('Requesting notification permission...');
+      
+      try {
+        const permission = await Notification.requestPermission();
+        log(`Permission: ${permission}`, permission === 'granted' ? 'success' : 'error');
+        
+        if (permission === 'granted') {
+          log('✅ You can now receive notifications', 'success');
+        } else {
+          log('❌ Permission denied', 'error');
+        }
+      } catch (error) {
+        log(`Error: ${error.message}`, 'error');
+      }
+    }
+
+    async function registerServiceWorker() {
+      log('Registering service worker...');
+      
+      try {
+        swRegistration = await navigator.serviceWorker.register('/service-worker.js');
+        log('✅ Service worker registered', 'success');
+        log(`Scope: ${swRegistration.scope}`);
+        
+        await navigator.serviceWorker.ready;
+        log('✅ Service worker ready', 'success');
+      } catch (error) {
+        log(`❌ Error: ${error.message}`, 'error');
+      }
+    }
+
+    function urlBase64ToUint8Array(base64String) {
+      const padding = '='.repeat((4 - base64String.length % 4) % 4);
+      const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+      const rawData = window.atob(base64);
+      return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
+    }
+
+    async function subscribeToPush() {
+      log('Subscribing to push notifications...');
+      
+      try {
+        if (!swRegistration) {
+          log('Service worker not registered yet!', 'error');
+          return;
+        }
+
+        // Get VAPID key
+        log('Fetching VAPID key...');
+        const response = await fetch(`${API_URL}/push/vapid-public-key`);
+        const { data } = await response.json();
+        log(`VAPID key: ${data.publicKey.substring(0, 20)}...`);
+
+        // Convert key
+        const applicationServerKey = urlBase64ToUint8Array(data.publicKey);
+        log('VAPID key converted');
+
+        // Subscribe
+        log('Calling pushManager.subscribe...');
+        const subscription = await swRegistration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: applicationServerKey
+        });
+        log('✅ Push subscription created', 'success');
+
+        // Send to server
+        log('Saving subscription to server...');
+        const saveResponse = await fetch(`${API_URL}/push/subscribe`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: 'demo-user',
+            subscription: subscription.toJSON()
+          })
+        });
+
+        const result = await saveResponse.json();
+        if (result.success) {
+          log('✅ Subscription saved to server!', 'success');
+          log('You will now receive notifications every minute');
+        } else {
+          log(`❌ Server error: ${result.error}`, 'error');
+        }
+      } catch (error) {
+        log(`❌ Error: ${error.message}`, 'error');
+        log(`Stack: ${error.stack}`);
+      }
+    }
+
+    async function sendTestPush() {
+      log('Sending test notification...');
+      
+      try {
+        const response = await fetch(`${API_URL}/push/test-push`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: 'demo-user' })
+        });
+
+        const result = await response.json();
+        if (result.success) {
+          log(`✅ ${result.message}`, 'success');
+        } else {
+          log(`❌ Error: ${result.error}`, 'error');
+        }
+      } catch (error) {
+        log(`❌ Error: ${error.message}`, 'error');
+      }
+    }
+
+    async function unsubscribe() {
+      log('Unsubscribing...');
+      
+      try {
+        const registration = await navigator.serviceWorker.ready;
+        const subscription = await registration.pushManager.getSubscription();
+        
+        if (subscription) {
+          await subscription.unsubscribe();
+          log('✅ Unsubscribed from push', 'success');
+          
+          // Remove from server
+          await fetch(`${API_URL}/push/unsubscribe`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ endpoint: subscription.endpoint })
+          });
+          log('✅ Removed from server', 'success');
+        } else {
+          log('No active subscription', 'info');
+        }
+      } catch (error) {
+        log(`❌ Error: ${error.message}`, 'error');
+      }
+    }
+
+    // Auto-check on load
+    window.onload = () => {
+      log('Page loaded. Tap buttons above to test.');
+      checkSupport();
+    };
+  </script>
+</body>
+</html>
