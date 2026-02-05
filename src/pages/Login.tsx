@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,12 +20,15 @@ export default function Login() {
     setError('');
     setIsLoading(true);
 
-    const result = await login(username, password);
+    // Simulate a small delay for better UX
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    const success = login(username, password);
     
-    if (result.success) {
+    if (success) {
       navigate('/');
     } else {
-      setError(result.error || 'Login failed');
+      setError('Invalid username or password');
       setPassword('');
     }
     
@@ -78,7 +81,7 @@ export default function Login() {
               />
             </div>
           </CardContent>
-          <CardFooter className="flex flex-col gap-3">
+          <CardFooter>
             <Button 
               type="submit" 
               className="w-full" 
@@ -86,12 +89,6 @@ export default function Login() {
             >
               {isLoading ? 'Signing in...' : 'Sign In'}
             </Button>
-            <p className="text-sm text-center text-muted-foreground">
-              Don't have an account?{' '}
-              <Link to="/register" className="text-primary hover:underline font-medium">
-                Register
-              </Link>
-            </p>
           </CardFooter>
         </form>
       </Card>

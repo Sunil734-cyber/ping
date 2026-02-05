@@ -8,9 +8,10 @@ import {
   requestPushPermission 
 } from '../lib/pushNotifications';
 
-export type PingInterval = 15 | 30 | 60 | 120;
+export type PingInterval = 1 | 15 | 30 | 60 | 120;
 
 export const INTERVAL_OPTIONS: { value: PingInterval; label: string }[] = [
+  { value: 1, label: '1 min (test)' },
   { value: 15, label: '15 min' },
   { value: 30, label: '30 min' },
   { value: 60, label: '1 hour' },

@@ -2,7 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import connectDB from './config/database.js';
-import authRoutes from './routes/auth.js';
 import notificationRoutes from './routes/notifications.js';
 import timeEntryRoutes from './routes/timeEntries.js';
 import pushRoutes from './routes/push.js';
@@ -50,7 +49,6 @@ app.use((req, res, next) => {
 });
 
 // Routes
-app.use('/api/auth', authRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/time-entries', timeEntryRoutes);
 app.use('/api/push', pushRoutes);
