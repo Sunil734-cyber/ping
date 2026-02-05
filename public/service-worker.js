@@ -89,8 +89,13 @@ self.addEventListener('notificationclick', (event) => {
     
     const activity = activityMap[event.action];
     const now = new Date();
-    const dateStr = now.toISOString().split('T')[0]; // YYYY-MM-DD
-    const hour = now.getHours();
+    
+    // Use local date/time instead of UTC
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const dateStr = `${year}-${month}-${day}`; // Local date YYYY-MM-DD
+    const hour = now.getHours(); // Local hour
     
     console.log(`Quick action selected: ${activity.customText} for ${dateStr} ${hour}:00`);
     
