@@ -36,7 +36,12 @@ export const useTimeEntries = () => {
     try {
       const response = await apiClient.getTimeEntries({ startDate, endDate });
       if (response.success) {
-        setEntries(response.data);
+        // Map MongoDB _id to our id field for consistency
+        const mappedEntries = response.data.map((entry: any) => ({
+          ...entry,
+          id: entry._id || `${entry.date}-${entry.hour}`,
+        }));
+        setEntries(mappedEntries);
       }
     } catch (error) {
       console.error('Failed to load time entries:', error);
@@ -92,39 +97,41 @@ const updateEntry = useCallback(async (
     categoryId: CategoryId | null,
     customText?: string
   ) => {
-    const entryId = `${date}-${hour}`;
-    
     try {
-      // Update in backend
-      await apiClient.createTimeEntry({
+      // Update in backend - it will create or update based on hour+date
+      const response = await apiClient.createTimeEntry({
         hour,
         date,
         categoryId,
         customText
       });
 
-      // Update local state
-      setEntries(prev => {
-        const existingIndex = prev.findIndex(e => e.id === entryId);
-        const newEntry: TimeEntry = {
-          id: entryId,
-          hour,
-          date,
-          categoryId,
-          customText,
-          timestamp: new Date(`${date}T${hour.toString().padStart(2, '0')}:00:00`).getTime(),
-        };
-        
-        if (existingIndex >= 0) {
-          const updated = [...prev];
-          updated[existingIndex] = newEntry;
-          return updated;
-        }
-        return [...prev, newEntry];
-      });
-
-      // Also save to localStorage as backup
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+      if (response.success) {
+        // Update local state with the returned entry from backend
+        setEntries(prev => {
+          const returnedEntry = response.data;
+          const entryId = returnedEntry._id || `${date}-${hour}`;
+          const existingIndex = prev.findIndex(e => 
+            (e.id === entryId) || (e.date === date && e.hour === hour)
+          );
+          
+          const newEntry: TimeEntry = {
+            id: entryId,
+            hour,
+            date,
+            categoryId,
+            customText,
+            timestamp: returnedEntry.timestamp || Date.now(),
+          };
+          
+          if (existingIndex >= 0) {
+            const updated = [...prev];
+            updated[existingIndex] = newEntry;
+            return updated;
+          }
+          return [...prev, newEntry];
+        });
+      }
     } catch (error) {
       console.error('Failed to update entry:', error);
       // Still update locally even if backend fails
