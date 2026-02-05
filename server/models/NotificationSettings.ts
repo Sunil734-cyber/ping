@@ -23,7 +23,7 @@ const NotificationSettingsSchema: Schema = new Schema({
   },
   interval: {
     type: Number,
-    enum: [15, 30, 60, 120],
+    enum: [1, 15, 30, 60, 120],
     default: 60
   },
   startTime: {
