@@ -25,6 +25,9 @@ import {
    onThemeChange: (theme: Theme) => void;
    activeTab: 'timeline' | 'dashboard';
    onTabChange: (tab: 'timeline' | 'dashboard') => void;
+   isPushEnabled: boolean;
+   onEnablePush: () => void;
+   onDisablePush: () => void;
  }
  
  export const Header = ({
@@ -39,6 +42,9 @@ import {
    onThemeChange,
    activeTab,
    onTabChange,
+   isPushEnabled,
+   onEnablePush,
+   onDisablePush,
  }: HeaderProps) => {
    const { logout, username } = useAuth();
    const navigate = useNavigate();
@@ -113,6 +119,24 @@ import {
                         ? `Pinging every ${INTERVAL_OPTIONS.find(o => o.value === interval)?.label}`
                         : 'Notifications disabled'}
                     </p>
+                  </div>
+
+                  <div className="pt-2 border-t">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium text-sm">Push Notifications</h4>
+                        <p className="text-xs text-muted-foreground">
+                          {isPushEnabled ? 'Works when app is closed' : 'Enable for background alerts'}
+                        </p>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant={isPushEnabled ? 'destructive' : 'default'}
+                        onClick={isPushEnabled ? onDisablePush : onEnablePush}
+                      >
+                        {isPushEnabled ? 'Disable' : 'Enable'}
+                      </Button>
+                    </div>
                   </div>
                  
                  <div className="pt-2 border-t">

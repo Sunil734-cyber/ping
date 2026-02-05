@@ -36,6 +36,9 @@ const Index = () => {
     requestPermission,
     startPings,
     stopPings,
+    isPushEnabled,
+    enablePushNotifications,
+    disablePushNotifications,
   } = useNotifications();
 
   return (
@@ -52,6 +55,9 @@ const Index = () => {
          onThemeChange={setTheme}
         activeTab={activeTab}
         onTabChange={setActiveTab}
+        isPushEnabled={isPushEnabled}
+        onEnablePush={enablePushNotifications}
+        onDisablePush={disablePushNotifications}
       />
 
       <main className="container max-w-lg mx-auto px-4 py-6 animate-fade-in">
