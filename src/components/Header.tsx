@@ -1,13 +1,21 @@
- import { Bell, BellOff, Clock } from 'lucide-react';
+import { Bell, BellOff, Clock, Settings } from 'lucide-react';
  import { Button } from '@/components/ui/button';
  import { cn } from '@/lib/utils';
+import { PingInterval, INTERVAL_OPTIONS } from '@/hooks/useNotifications';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
  
  interface HeaderProps {
    notificationsEnabled: boolean;
    notificationPermission: NotificationPermission;
+  interval: PingInterval;
    onEnableNotifications: () => void;
    onDisableNotifications: () => void;
    onRequestPermission: () => void;
+  onIntervalChange: (interval: PingInterval) => void;
    activeTab: 'timeline' | 'dashboard';
    onTabChange: (tab: 'timeline' | 'dashboard') => void;
  }
@@ -15,9 +23,11 @@
  export const Header = ({
    notificationsEnabled,
    notificationPermission,
+  interval,
    onEnableNotifications,
    onDisableNotifications,
    onRequestPermission,
+  onIntervalChange,
    activeTab,
    onTabChange,
  }: HeaderProps) => {
@@ -46,25 +56,66 @@
              <span className="text-xl font-bold">Ping</span>
            </div>
  
-           {/* Notification Toggle */}
-           <Button
-             variant="ghost"
-             size="icon"
-             onClick={handleNotificationToggle}
-             className={cn(
-               'relative',
-               notificationsEnabled && 'text-primary'
-             )}
-           >
-             {notificationsEnabled ? (
-               <Bell className="h-5 w-5" />
-             ) : (
-               <BellOff className="h-5 w-5 text-muted-foreground" />
-             )}
-             {notificationsEnabled && (
-               <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-primary" />
-             )}
-           </Button>
+          {/* Notification Settings */}
+          <div className="flex items-center gap-1">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Settings className="h-5 w-5 text-muted-foreground" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-64" align="end">
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-medium text-sm mb-2">Ping Interval</h4>
+                    <div className="grid grid-cols-2 gap-2">
+                      {INTERVAL_OPTIONS.map((option) => (
+                        <button
+                          key={option.value}
+                          onClick={() => onIntervalChange(option.value)}
+                          className={cn(
+                            'px-3 py-2 text-sm rounded-lg transition-all',
+                            interval === option.value
+                              ? 'bg-primary text-primary-foreground'
+                              : 'bg-muted hover:bg-muted/80 text-foreground'
+                          )}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div className="pt-2 border-t">
+                    <p className="text-xs text-muted-foreground">
+                      {notificationsEnabled
+                        ? `Pinging every ${INTERVAL_OPTIONS.find(o => o.value === interval)?.label}`
+                        : 'Notifications disabled'}
+                    </p>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+            
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleNotificationToggle}
+              className={cn(
+                'relative',
+                notificationsEnabled && 'text-primary'
+              )}
+            >
+              {notificationsEnabled ? (
+                <Bell className="h-5 w-5" />
+              ) : (
+                <BellOff className="h-5 w-5 text-muted-foreground" />
+              )}
+              {notificationsEnabled && (
+                <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-primary" />
+              )}
+            </Button>
+          </div>
          </div>
  
          {/* Tab Navigation */}
@@ -78,7 +129,7 @@
                  : 'text-muted-foreground hover:bg-muted'
              )}
            >
-             Timeline
+            Calendar
            </button>
            <button
              onClick={() => onTabChange('dashboard')}
