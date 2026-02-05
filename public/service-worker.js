@@ -1,0 +1,107 @@
+// Service Worker for Push Notifications
+/* eslint-disable no-restricted-globals */
+
+self.addEventListener('install', (event) => {
+  console.log('Service Worker installing...');
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', (event) => {
+  console.log('Service Worker activating...');
+  event.waitUntil(self.clients.claim());
+});
+
+// Handle push notifications
+self.addEventListener('push', (event) => {
+  console.log('Push notification received:', event);
+  
+  let notificationData = {
+    title: '🔔 Ping!',
+    body: 'What are you doing?',
+    icon: '/icon-192.png',
+    badge: '/badge-72.png',
+    tag: 'ping-notification',
+    requireInteraction: true,
+    data: {
+      url: '/',
+      timestamp: Date.now()
+    }
+  };
+
+  if (event.data) {
+    try {
+      const payload = event.data.json();
+      notificationData = { ...notificationData, ...payload };
+    } catch (error) {
+      console.error('Error parsing push payload:', error);
+    }
+  }
+
+  event.waitUntil(
+    self.registration.showNotification(notificationData.title, {
+      body: notificationData.body,
+      icon: notificationData.icon,
+      badge: notificationData.badge,
+      tag: notificationData.tag,
+      requireInteraction: notificationData.requireInteraction,
+      data: notificationData.data,
+      vibrate: [200, 100, 200],
+      actions: [
+        {
+          action: 'open',
+          title: 'Log Activity'
+        },
+        {
+          action: 'close',
+          title: 'Dismiss'
+        }
+      ]
+    })
+  );
+});
+
+// Handle notification clicks
+self.addEventListener('notificationclick', (event) => {
+  console.log('Notification clicked:', event);
+  
+  event.notification.close();
+
+  if (event.action === 'close') {
+    return;
+  }
+
+  // Open the app
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      // If app is already open, focus it
+      for (const client of clientList) {
+        if (client.url.includes(self.location.origin) && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      
+      // Otherwise, open a new window
+      if (self.clients.openWindow) {
+        const urlToOpen = event.notification.data?.url || '/';
+        return self.clients.openWindow(urlToOpen);
+      }
+    })
+  );
+});
+
+// Handle notification close
+self.addEventListener('notificationclose', (event) => {
+  console.log('Notification closed:', event);
+});
+
+// Optional: Background sync for offline support
+self.addEventListener('sync', (event) => {
+  console.log('Background sync triggered:', event.tag);
+  
+  if (event.tag === 'sync-time-entries') {
+    event.waitUntil(
+      // Sync any pending time entries
+      Promise.resolve()
+    );
+  }
+});
