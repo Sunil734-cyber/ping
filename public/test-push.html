@@ -140,6 +140,7 @@
 
     async function requestPermission() {
       log('Requesting notification permission...');
+      log(`Current status: ${Notification.permission}`, 'info');
       
       try {
         // Check if already denied
@@ -159,17 +160,29 @@
           return;
         }
 
+        if (Notification.permission === 'default') {
+          log('⏳ Watch for a POPUP asking permission...', 'info');
+        }
+
         const permission = await Notification.requestPermission();
         log(`Permission result: ${permission}`, permission === 'granted' ? 'success' : 'error');
         
         if (permission === 'granted') {
+          log('✅ PERMISSION GRANTED!', 'success');
           log('✅ You can now receive notifications', 'success');
           log('Next: Tap "3. Register SW"', 'info');
         } else if (permission === 'denied') {
-          log('❌ You tapped DENY!', 'error');
-          log('Follow the steps above to fix it', 'error');
+          log('❌ You clicked BLOCK or DENY!', 'error');
+          log('', 'error');
+          log('Now you need to manually allow it:', 'error');
+          log('1. Tap 🔒 lock icon at top', 'error');
+          log('2. Tap "Site settings"', 'error');
+          log('3. Find "Notifications"', 'error');
+          log('4. Change to "Allow"', 'error');
+          log('5. Then tap this button again', 'error');
         } else {
-          log('⚠️ Permission dismissed. Tap button again.', 'error');
+          log('⚠️ Permission popup was dismissed/closed', 'error');
+          log('Tap the button again and choose ALLOW', 'error');
         }
       } catch (error) {
         log(`Error: ${error.message || error}`, 'error');
