@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: pingdaily
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm install && npm run build:all
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: VAPID_PUBLIC_KEY
+        sync: false
+      - key: VAPID_PRIVATE_KEY
+        sync: false
+      - key: VAPID_SUBJECT
+        value: mailto:pingdaily@example.com
+      - key: PORT
+        value: 10000
+    autoDeploy: true
