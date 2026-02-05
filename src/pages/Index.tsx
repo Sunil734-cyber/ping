@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Header } from '@/components/Header';
-import { Timeline } from '@/components/Timeline';
+import { CalendarView } from '@/components/CalendarView';
 import { Dashboard } from '@/components/Dashboard';
 import { useTimeEntries } from '@/hooks/useTimeEntries';
 import { useNotifications } from '@/hooks/useNotifications';
@@ -15,13 +15,16 @@ const Index = () => {
     selectedDate,
     setSelectedDate,
     updateEntry,
+    getEntriesForDate,
   } = useTimeEntries();
 
   const {
     permission,
     isEnabled,
+    interval,
+    setInterval,
     requestPermission,
-    startHourlyPings,
+    startPings,
     stopPings,
   } = useNotifications();
 
@@ -30,19 +33,19 @@ const Index = () => {
       <Header
         notificationsEnabled={isEnabled}
         notificationPermission={permission}
-        onEnableNotifications={startHourlyPings}
+        interval={interval}
+        onEnableNotifications={() => startPings(interval)}
         onDisableNotifications={stopPings}
         onRequestPermission={requestPermission}
+        onIntervalChange={setInterval}
         activeTab={activeTab}
         onTabChange={setActiveTab}
       />
 
       <main className="container max-w-lg mx-auto px-4 py-6 animate-fade-in">
         {activeTab === 'timeline' ? (
-          <Timeline
-            entries={entries}
-            selectedDate={selectedDate}
-            onDateChange={setSelectedDate}
+          <CalendarView
+            getEntriesForDate={getEntriesForDate}
             onUpdateEntry={updateEntry}
           />
         ) : (
@@ -58,13 +61,13 @@ const Index = () => {
               <div className="flex-1">
                 <h3 className="font-medium text-sm">Enable notifications</h3>
                 <p className="text-xs text-muted-foreground">
-                  Get hourly pings to log your activities
+                  Get pings to log your activities
                 </p>
               </div>
               <button
                 onClick={async () => {
                   const granted = await requestPermission();
-                  if (granted) startHourlyPings();
+                  if (granted) startPings(interval);
                 }}
                 className="px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-lg hover:opacity-90 transition-opacity"
               >
